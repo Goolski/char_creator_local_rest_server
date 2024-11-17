@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from character import Character, CharacterException, NoteNotFoundException, TargetFieldNotFoundException, DuplicateFieldNameException
+from field import Field
 
 app = Flask(__name__)
 
