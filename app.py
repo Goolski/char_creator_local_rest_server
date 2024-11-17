@@ -55,5 +55,10 @@ def delete_character(character_id):
     characters = [char for char in characters if char.id != character_id]
     return '', 204
 
+@app.route('/not_found', methods=['GET'])
+def not_found():
+    """Always return a 404 response."""
+    return jsonify({"error": "Not found"}), 404
+
 if __name__ == '__main__':
     app.run(debug=True)
