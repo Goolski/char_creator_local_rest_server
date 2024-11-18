@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from character import Character, CharacterException, NoteNotFoundException, TargetFieldNotFoundException, DuplicateFieldNameException
 from field import Field
+from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
 
@@ -23,12 +24,16 @@ def get_character(character_id):
 @app.route('/characters', methods=['POST'])
 def create_character():
     """Create a new character."""
-    data = request.get_json()
-    fields = [Field.from_json(field) for field in data.get("fields", [])]
     try:
+        data = request.get_json()
+        if data is None:
+            raise BadRequest("Invalid JSON")
+        fields = [Field.from_json(field) for field in data.get("fields", [])]
         new_character = Character.create(fields=fields)
         characters.append(new_character)
         return jsonify(new_character.to_json()), 201
+    except BadRequest as e:
+        return jsonify({"error": str(e)}), 400
     except CharacterException as e:
         return jsonify({"error": str(e)}), 400
 
@@ -39,12 +44,16 @@ def update_character(character_id):
     if character is None:
         return jsonify({"error": "Character not found"}), 404
 
-    data = request.get_json()
-    fields = [Field.from_json(field) for field in data.get("fields", [])]
     try:
+        data = request.get_json()
+        if data is None:
+            raise BadRequest("Invalid JSON")
+        fields = [Field.from_json(field) for field in data.get("fields", [])]
         updated_character = character.copy_with(fields=fields)
         characters[characters.index(character)] = updated_character
         return jsonify(updated_character.to_json())
+    except BadRequest as e:
+        return jsonify({"error": str(e)}), 400
     except CharacterException as e:
         return jsonify({"error": str(e)}), 400
 
@@ -59,6 +68,11 @@ def delete_character(character_id):
 def not_found():
     """Always return a 404 response."""
     return jsonify({"error": "Not found"}), 404
+
+@app.errorhandler(BadRequest)
+def handle_bad_request(e):
+    """Handle 400 Bad Request errors."""
+    return jsonify({"error": "Bad Request"}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
