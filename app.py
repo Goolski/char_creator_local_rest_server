@@ -74,5 +74,10 @@ def handle_bad_request(e):
     """Handle 400 Bad Request errors."""
     return jsonify({"error": "Bad Request"}), 400
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Handle 500 Internal Server Error."""
+    return jsonify({"error": "Internal Server Error"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
